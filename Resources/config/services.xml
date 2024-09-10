@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <!-- Collections -->
+        <service id="Ict\ApiOneEndpoint\Operation\OperationCollection" class="Ict\ApiOneEndpoint\Operation\OperationCollection">
+            <argument type="tagged_iterator" tag="ict.api_one_endpoint.operation"/>
+        </service>
+
+        <service id="Ict\ApiOneEndpoint\Operation\OperationHandlerDiscover" class="Ict\ApiOneEndpoint\Operation\OperationHandlerDiscover" public="false">
+            <argument type="service" id="Ict\ApiOneEndpoint\Operation\OperationCollection" />
+        </service>
+
+        <service id="Ict\ApiOneEndpoint\Operation\OperationInputValidator" class="Ict\ApiOneEndpoint\Operation\OperationInputValidator">
+            <argument type="service" id="validator" />
+            <argument type="service" id="serializer" />
+        </service>
+
+        <service id="Ict\ApiOneEndpoint\Operation\OperationBackgroundHandler" class="Ict\ApiOneEndpoint\Operation\OperationBackgroundHandler">
+            <argument type="service" id="Symfony\Component\Messenger\MessageBusInterface" />
+        </service>
+
+        <!-- Operations -->
+        <service id="Ict\ApiOneEndpoint\Operation\OperationHandler" class="Ict\ApiOneEndpoint\Operation\OperationHandler">
+            <argument type="service" id="Ict\ApiOneEndpoint\Operation\OperationHandlerDiscover" />
+            <argument type="service" id="Ict\ApiOneEndpoint\Operation\OperationBackgroundHandler" />
+            <argument type="service" id="Ict\ApiOneEndpoint\Attribute\AttributeHelper" />
+            <argument type="service" id="Ict\ApiOneEndpoint\Operation\OperationInputValidator" />
+            <argument type="service" id="event_dispatcher" />
+            <argument type="service" id="security.helper" />
+        </service>
+        <!-- End operations -->
+
+        <service id="Ict\ApiOneEndpoint\Attribute\AttributeHelper" class="Ict\ApiOneEndpoint\Attribute\AttributeHelper">
+        </service>
+
+        <service id="Ict\ApiOneEndpoint\EventSubscriber\OperationValidationSubscriber" class="Ict\ApiOneEndpoint\EventSubscriber\OperationValidationSubscriber">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Ict\ApiOneEndpoint\Message\OperationMessageHandler" class="Ict\ApiOneEndpoint\Message\OperationMessageHandler">
+            <argument type="service" id="Ict\ApiOneEndpoint\Operation\OperationCollection" />
+            <argument type="service" id="event_dispatcher" />
+            <tag name="messenger.message_handler"/>
+        </service>
+
+    </services>
+</container>
